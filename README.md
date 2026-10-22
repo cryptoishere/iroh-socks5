@@ -119,8 +119,6 @@ Depending on the application configuration, relevant settings may include:
 |---|---|
 | `ENDPOINT_BIND_ADDRESS` | Local address and port used by the remote Iroh endpoint |
 | `RELAY_URL_PUBLIC` | Configured relay URL |
-| `RELAY_URL` | Client-side relay configuration, if supported by the deployment |
-| `SOCKS5_ALPN` | Application protocol identifier negotiated through Iroh |
 
 The exact environment variables and defaults depend on the binary and configuration implementation. Consult the relevant configuration code and deployment documentation before deploying.
 

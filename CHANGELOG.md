@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [Unreleased]
+## [0.4.0] - 2026-10-22
 
 ### Added
 
@@ -36,5 +36,5 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added configuration and firewall guidance.
 - Documented the relationship with the original SOCKS5 implementation.
 
-[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.1.0
+[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.0

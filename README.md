@@ -126,11 +126,11 @@ Do not assume that a bind address, advertised endpoint address, and public NAT-m
 
 ## Project history
 
-The project builds upon the original SOCKS5 Tunnel repository, which implemented a minimal SOCKS5 proxy in Rust using mio, non-blocking I/O, SOCKS5 protocol framing, authentication, and server-side DNS resolution.
+The project builds upon the [original SOCKS5 Tunnel repository](https://github.com/cryptoishere/socks5-tunnel-pub/releases/tag/v0.4.0), which implemented a minimal SOCKS5 proxy in Rust using mio, non-blocking I/O, SOCKS5 protocol framing, authentication, and server-side DNS resolution.
 
 iroh-socks5 extends that foundation with an Iroh-based transport architecture, separating the local proxy interface from remote endpoint connectivity and encrypted session transport.
 
-See the original repository for the earlier implementation and project history.
+See the [original repository](https://github.com/cryptoishere/socks5-tunnel-pub/releases/tag/v0.4.0) for the earlier implementation and project history.
 
 ## Development status
 

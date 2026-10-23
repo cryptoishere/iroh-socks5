@@ -17,6 +17,7 @@ The project combines a local SOCKS5 interface with authenticated Iroh sessions, 
 - **Application-level authorization** — supports integration with account-bound credentials and authenticated session initialization.
 - **Server-side destination connections** — the remote server connects to the requested target on behalf of the client.
 - **Configurable endpoint binding** — allows endpoint bind addresses to be configured for different network environments.
+- **Cross-platform bridge** — works on Unix and Windows (see *Platform support*).
 
 ## Architecture
 
@@ -47,6 +48,15 @@ The client provides a local SOCKS5 endpoint. Applications connect to that endpoi
 The client establishes a session with the remote server. Iroh handles endpoint connectivity and encrypted transport, attempting a direct peer-to-peer path when possible and using a relay when necessary.
 
 The remote server processes the proxied request and establishes the connection to the requested destination.
+
+A small unified bridge module pumps bytes between an Iroh bidirectional stream and the `mio` event loop. The `mio` side is a `ClientSocket` — an `AF_UNIX` pair on Unix, or a loopback TCP pair on Windows — while the tokio side is produced by `create_pair()`. Both ends are non-blocking, and the same byte pump is used on every platform.
+
+## Platform support
+
+| Platform | Local pair mechanism | Notes |
+|---|---|---|
+| Unix | `AF_UNIX` socket pair (`socketpair(2)`) | Native non-blocking Unix stream pair, wrapped for `mio` and tokio. |
+| Windows | Loopback TCP pair (`127.0.0.1:0`) | Windows has no `socketpair(2)`, so a listener/client/accept sequence is used. Nagle is disabled on both ends to keep loopback latency low. |
 
 ## Quick example
 

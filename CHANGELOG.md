@@ -2,7 +2,28 @@
 
 All notable changes to this project are documented in this file.
 
-The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.4.2] - 2026-10-25
+
+### Added
+
+- **Terminal UI dashboard** (`ui` feature, on by default) showing bind address, wallet, key fingerprint, relay URL, live upload/download, connection path (direct/relay), uptime, suspend status, and the active IP checker list.
+- **Configurable IP checker list** via `HOST_IP_CHECKERS_LIST` (comma-separated HTTPS URLs). Unset or empty → built-in defaults. Only `https://` entries are accepted; invalid entries are skipped with a warning. The list is parsed once at startup and shared between the IP monitor and the dashboard.
+- Headless fallback when stdout is not a TTY, plus terminal restore on panic and normal exit.
+- `AppState` / `TrafficStats` for lock-free live stats shared between the byte pump and the UI.
+- Graceful iroh endpoint teardown via `CancellationToken` and explicit `peer.close().await`.
+
+### Fixed
+
+- Silenced the recurring `Endpoint dropped without calling Endpoint::close` warning on shutdown.
+
+### Documentation
+
+- README: platform support section (Unix `AF_UNIX` vs. Windows loopback TCP pair), `ui` feature flag, and `HOST_IP_CHECKERS_LIST`.
 
 ## [0.4.1] - 2026-10-23
 
@@ -50,6 +71,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added configuration and firewall guidance.
 - Documented the relationship with the original SOCKS5 implementation.
 
-[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.2
 [0.4.1]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.1
 [0.4.0]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.0

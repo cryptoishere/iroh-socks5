@@ -18,6 +18,7 @@ The project combines a local SOCKS5 interface with authenticated Iroh sessions, 
 - **Server-side destination connections** — the remote server connects to the requested target on behalf of the client.
 - **Configurable endpoint binding** — allows endpoint bind addresses to be configured for different network environments.
 - **Cross-platform bridge** — works on Unix and Windows (see *Platform support*).
+- **Configurable IP checkers** — the public IP checker pool can be supplied via `HOST_IP_CHECKERS_LIST`, and the active list plus suspend state are surfaced in the dashboard.
 
 ## Architecture
 
@@ -95,6 +96,16 @@ The Iroh endpoint bind address is separate from the local SOCKS5 listener.
 - Relay connectivity can remain available when direct connectivity is blocked, provided the relay is reachable and configured.
 - Do not expose the local SOCKS5 listener to public interfaces unless remote access is explicitly required and properly secured.
 
+## Public IP monitoring
+
+The server periodically checks its public IP through a small pool of HTTPS endpoints and reports changes to the central endpoint. The list of checkers is configurable and, when the dashboard is enabled, the active list and current suspend state are visible in the UI.
+
+### Configuring the checker list
+
+```shell
+HOST_IP_CHECKERS_LIST="https://crypto-ig.com/ip,https://api.ipify.org,https://ifconfig.me/ip"
+```
+
 ## Security model
 
 ### Transport encryption
@@ -129,6 +140,7 @@ Depending on the application configuration, relevant settings may include:
 |---|---|
 | `ENDPOINT_BIND_ADDRESS` | Local address and port used by the remote Iroh endpoint |
 | `RELAY_URL_PUBLIC` | Configured relay URL |
+| `HOST_IP_CHECKERS_LIST` | Comma-separated HTTPS URLs used to determine the public IP. Unset → built-in defaults. Only `https://` entries are accepted. |
 
 The exact environment variables and defaults depend on the binary and configuration implementation. Consult the relevant configuration code and deployment documentation before deploying.
 

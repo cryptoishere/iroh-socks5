@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-11-7
+
+### Added
+
+- Added HMAC-derived key separation for HTTP authentication, tunnel authentication, and tunnel encryption.
+- Added signature type identifiers for system and client signatures.
+- Fixed client tunnel Hello address-length validation, rejecting addresses outside the supported 1–255-byte range.
+
+### Changed
+
+- Modified signed RFC 1929 credential parsing and serialization.
+
 ## [0.4.2] - 2026-10-25
 
 ### Added
@@ -71,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added configuration and firewall guidance.
 - Documented the relationship with the original SOCKS5 implementation.
 
-[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.3
 [0.4.2]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.2
 [0.4.1]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.1
 [0.4.0]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.0

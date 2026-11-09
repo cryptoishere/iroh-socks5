@@ -106,6 +106,43 @@ The server periodically checks its public IP through a small pool of HTTPS endpo
 HOST_IP_CHECKERS_LIST="https://crypto-ig.com/ip,https://api.ipify.org,https://ifconfig.me/ip"
 ```
 
+## Port Policy
+
+The server enforces a **default-deny allowlist** on outbound TCP and UDP. Every destination is checked **before** DNS resolution (by port) and **after** DNS resolution (by resolved IP, see [IP Policy](#ip-policy)). Blocked destinations receive a SOCKS5 reply with `REP = 0x02` ("connection not allowed by ruleset") on V1, or the equivalent V2 status on V2 CONNECT / CONNECT-UDP. The client sees this as a normal proxy refusal.
+
+### Format
+
+`SOCKS5_ALLOWED_PORTS` accepts a comma-separated list of individual ports and `lo-hi` ranges:
+
+```bash
+SOCKS5_ALLOWED_PORTS=22,80,443,8080,8443,853        # individual ports
+SOCKS5_ALLOWED_PORTS=1-1024,8080,8443           # ranges
+SOCKS5_ALLOWED_PORTS=443                        # HTTPS only
+SOCKS5_ALLOWED_PORTS=*                          # allow everything
+SOCKS5_ALLOWED_PORTS=                           # deny everything
+```
+
+## IP Policy
+
+After DNS resolution, the server checks every candidate address against a policy of "never let the tunnel reach internal infrastructure." This is the primary mitigation against **Server-Side Request Forgery (SSRF)** and against cloud metadata exfiltration.
+
+When `SOCKS5_BLOCK_PRIVATE_IPS` is `on` (the default), the following destinations are refused regardless of port:
+
+| Range | What it protects |
+|---|---|
+| `127.0.0.0/8`, `::1` | Server-local services (loopback) |
+| `10.0.0.0/8` | RFC 1918 private |
+| `172.16.0.0/12` | RFC 1918 private |
+| `192.168.0.0/16` | RFC 1918 private |
+| `169.254.0.0/16` | Link-local / APIPA / cloud metadata `169.254.169.254` |
+| `100.64.0.0/10` | Carrier-grade NAT |
+| `0.0.0.0`, `::` | Unspecified / wildcard |
+| `fc00::/7` | IPv6 ULA |
+| `fe80::/10` | IPv6 link-local |
+| `255.255.255.255` | Broadcast |
+
+Set `SOCKS5_BLOCK_PRIVATE_IPS=off` only if the server is intentionally deployed to reach internal services (e.g., as an internal-only exit node behind a firewall). For any server exposed to the internet, keep it **on**.
+
 ## Security model
 
 ### Transport encryption
@@ -141,10 +178,27 @@ Depending on the application configuration, relevant settings may include:
 | `ENDPOINT_BIND_ADDRESS` | Local address and port used by the remote Iroh endpoint |
 | `RELAY_URL_PUBLIC` | Configured relay URL |
 | `HOST_IP_CHECKERS_LIST` | Comma-separated HTTPS URLs used to determine the public IP. Unset → built-in defaults. Only `https://` entries are accepted. |
+| `SOCKS5_ALLOWED_PORTS` | Server-side egress allowlist. See [Port Policy](#port-policy). |
+| `SOCKS5_BLOCK_PRIVATE_IPS` | Block loopback / RFC 1918 / link-local / CGNAT / IPv6 ULA destinations. See [IP Policy](#ip-policy). |
+| `RELAY_IDLE_SECS` | Seconds a half-closed relay may sit idle before being torn downss |
 
 The exact environment variables and defaults depend on the binary and configuration implementation. Consult the relevant configuration code and deployment documentation before deploying.
 
 Do not assume that a bind address, advertised endpoint address, and public NAT-mapped address are interchangeable.
+
+### Data Directory
+The server stores its database (account credentials, etc.) in a platform-specific application data directory.
+
+**Windows:**
+Uses `LOCALAPPDATA` as its base directory and appends `CiGPeerApp\db`.
+Example: `C:\Users\Alice\AppData\Local\CiGPeerApp\db`
+*(Note: `LOCALAPPDATA` must be set).*
+
+**Linux:**
+Appends `CiGPeerApp/db` to the following base directory:
+- If `XDG_DATA_HOME` is set, its value is used.
+- Otherwise, the server uses `$HOME/.local/share`.
+Example: `/home/alice/.local/share/CiGPeerApp/db`
 
 ## Project history
 

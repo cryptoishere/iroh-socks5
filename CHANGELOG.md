@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-11-09
+
+### Fixed
+
+- **Server never closed Connections for dead clients.** The server's own keepalive interval was below its idle timeout, so each PING it sent restarted its own idle timer. The idle timeout never fired and every Connection the server had ever accepted stayed open, holding around four file descriptors each. After a few hours of browser traffic, roughly 240 zombie Connections accumulated and hit the default file descriptor limit, producing `Too many open files` on socket pair creation. The server keepalive interval is now above the idle timeout. The client still sends keepalives every two seconds — that is the direction that keeps SSH and WebTransport sessions alive, and it is unchanged. When a client dies, its PINGs stop and the server's idle timer runs to completion.
+- **Socket pair file descriptors leaked when a Connection closed abruptly.** The shutdown that should have closed the socket pair write side was gated behind a success check, so on transport errors it never ran and both descriptors were held until process exit. The shutdown is now issued unconditionally.
+- **The relay idle timeout was only observed while the relay was still generating events.** Once both sockets in a relay had nothing left to write, the event loop stopped firing for it, so the deadline was never re-checked and the relay and its descriptors stayed in the table indefinitely. The main loop now sweeps every relay each poll cycle rather than waiting for events. The timeout value and the condition are unchanged.
+- **Two failure paths in the stream-accept loop exited without notifying the event loop.** Socket pair creation failure and hand-off failure both returned early, bypassing the cleanup notification, so the bridge's descriptors stayed open until process exit. Both now fall through to the same cleanup used by every other exit path.
+- **The stream-accept loop could block forever after an abnormal Connection close.** It only exited on a clean end-of-stream, which does not always arrive. It is now also gated on the per-Connection cancellation handle.
+- **The server TUI did not refresh after first-run registration.** The wallet address and key fingerprint in the Identity panel were captured at startup, before the account was provisioned. Both are now re-read after successful registration and reflected immediately on first launch.
+
+### Added
+
+- **`CONN_HARD_IDLE_SECS` (default 300 seconds).** Per-Connection watchdog. Force-closes any Connection with no application traffic for five minutes, regardless of whether the transport layer ever reports the close.
+- **`RELAY_IDLE_SECS` (default 60 seconds).** Per-relay idle timeout. A relay whose one side has closed but whose peer never sent FIN is torn down after the timeout.
+
+### Changed
+
+- **Connection cleanup is structural.** The watchdog, stream-accept loop for a Connection share one cancellation handle. Whichever of them detects termination first cancels the rest, and the two descriptors attached to the Connection are released on every termination path — clean close, watchdog, transport error, or sibling cancel.
+
+### Deployment note
+
+- **Raise the process file descriptor limit to 65536** (systemd `LimitNOFILE` or `ulimit -n`). The fixes above eliminate the FD leaks, but the default of 1024 is still insufficient headroom for a proxy under normal browser load. Without it, transient `EMFILE` errors can occur during a burst even in the absence of a leak.
+
+
 ## [0.4.3] - 2026-11-7
 
 ### Added
@@ -83,7 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added configuration and firewall guidance.
 - Documented the relationship with the original SOCKS5 implementation.
 
-[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.4
 [0.4.3]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.3
 [0.4.2]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.2
 [0.4.1]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.1

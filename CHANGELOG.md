@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-10
+
+### Changed (Breaking)
+
+- **Tunnel Hello wire format.** The plaintext `Hello` message now carries a **signature type** byte (`0x00` = SYSTEM, `0x01` = CLIENT) immediately after the magic and before the address-length field. The value is covered by the HMAC, so the client's claimed identity is cryptographically bound to possession of the matching account's secret.
+- **`MAGIC_HELLO` bumped** from `S5-TUNNEL-v1\x00\x00\x00\x00` to `S5-TUNNEL-v2\x00\x00\x00\x00`. Peers running different versions now fail the handshake with `bad magic` instead of misparsing the byte stream.
+
+This is a **wire-incompatible change**. Server and client must be upgraded together. A 0.5.x client cannot connect to a 0.6.0 server, and a 0.6.0 client cannot connect to a 0.5.x server. The failure is immediate and explicit (`bad magic`), not silent data corruption.
+
+### Added
+
+- **`SYSTEM_SIG_TYPE` / `CLIENT_SIG_TYPE`** exported from `lib::auth::proxy_auth::signature` and validated during Hello parsing. Unknown signature types are rejected before any account lookup.
+
 ## [0.4.4] - 2026-11-09
 
 ### Fixed
@@ -108,9 +121,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added configuration and firewall guidance.
 - Documented the relationship with the original SOCKS5 implementation.
 
-[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.4...HEAD
-[0.4.4]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.4
-[0.4.3]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.3
-[0.4.2]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.2
-[0.4.1]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.1
+[Unreleased]: https://github.com/cryptoishere/iroh-socks5/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.4...v0.5.0
+[0.4.4]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/cryptoishere/iroh-socks5/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/cryptoishere/iroh-socks5/releases/tag/v0.4.0

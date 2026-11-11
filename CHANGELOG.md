@@ -18,7 +18,7 @@ This is a **wire-incompatible change**. Server and client must be upgraded toget
 
 ### Added
 
-- **`SYSTEM_SIG_TYPE` / `CLIENT_SIG_TYPE`** exported from `lib::auth::proxy_auth::signature` and validated during Hello parsing. Unknown signature types are rejected before any account lookup.
+- **`SYSTEM_TYPE` / `CLIENT_TYPE`** exported from `lib::crypto::tunnel` and validated during Hello parsing. Unknown signature types are rejected before any account lookup.
 
 ## [0.4.4] - 2026-11-09
 
